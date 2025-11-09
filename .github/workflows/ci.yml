@@ -1,67 +1,73 @@
+# .github/workflows/ci.yml
+
 name: CI - Build, Testes e Analise de Qualidade (SonarCloud)
 
 on:
-  # Dispara em pushes na main E em todos os Pull Requests
+  # Dispara a pipeline em pushes para a branch 'main' E em todos os Pull Requests
   push:
     branches:
       - main
-  pull_request:
+  pull_request: # <-- Ativa o workflow para revisao de codigo em PRs
     types: [opened, synchronize, reopened]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # Usa o runner Linux
 
     steps:
       - name: 1. Checkout do Codigo
         uses: actions/checkout@v4
         with:
+          # Necessario para o SonarCloud analisar o historico de commits
           fetch-depth: 0
 
       - name: 2. Setup do .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "6.0.x"
+          dotnet-version: "6.0.x" # Versao recomendada. Ajuste se necessario.
 
-      # --------- Integracao com SonarCloud ---------
+      # -----------------------------------------------------
+      # 3. INICIAR ANALISE DO SONARCLOUD (Ponto da Correcao)
+      # -----------------------------------------------------
 
       - name: 3. Iniciar Analise do SonarCloud
         env:
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }} # Segredo configurado no GitHub
         run: |
           dotnet tool install --global dotnet-sonarscanner
 
-          # Constrói os parâmetros básicos
-            SONAR_PR_ARGS=""
+          # Define os parametros padrao e basicos do scanner (inclui organizacao e chave)
+          SONAR_BEGIN_CMD="dotnet sonarscanner begin \
+            /k:\"tinalmeid_DDD_DominioManutencaoSubsidiaria_Udemy\" \
+            /o:\"tinalmeid\" \
+            /d:sonar.token=\"${{ secrets.SONARCLOUD_TOKEN }}\" \
+            /d:sonar.host.url=\"https://sonarcloud.io\" \
+            /d:sonar.cs.opencover.reportsPaths=\"test/Manutencao.SolicitacaoTestes/coverage.opencover.xml\""
 
-            # Adiciona os parâmetros de PR APENAS se o evento for um Pull Request
-            if [ "${{ github.event_name }}" == "pull_request" ]; then
-                SONAR_PR_ARGS="/d:sonar.pullrequest.key=${{ github.event.pull_request.number }} /d:sonar.pullrequest.branch=${{ github.head_ref }} /d:sonar.pullrequest.base=${{ github.base_ref }}"
-                fi
+          # LOGICA CONDICIONAL: Adiciona parametros de PR APENAS se o evento for um pull_request.
+          # Isso corrige o erro 'No such file or directory' que voce estava vendo.
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            SONAR_BEGIN_CMD+="/d:sonar.pullrequest.key=${{ github.event.pull_request.number }} /d:sonar.pullrequest.branch=${{ github.head_ref }} /d:sonar.pullrequest.base=${{ github.base_ref }}"
+          fi
 
-          # --- Comando 'dotnet sonarscanner begin' ---
-          dotnet sonarscanner begin \
-            /k:"tinalmeid_DDD_DominioManutencaoSubsidiaria_Udemy"\
-            /o:"tinalmeid" \
-            /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" \
-            /d:sonar.host.url="https://sonarcloud.io" \
-            /d:sonar.cs.opencover.reportsPaths="test/Manutencao.SolicitacaoTestes/coverage.opencover.xml" \
-            
-            # --- Parametros condicionais para Pull Request ---
-            # O SonarCloud precisa desses parametros para fazer o Code Review no PR
-            /d:sonar.pullrequest.key=${{ github.event.pull_request.number }} \
-            /d:sonar.pullrequest.branch=${{ github.head_ref }} \
-            /d:sonar.pullrequest.base=${{ github.base_ref }}
+          # Executa o comando final
+          $SONAR_BEGIN_CMD
 
       - name: 4. Build do Projeto (Compilacao)
+        # Deve ser executado apos o 'sonarscanner begin'
         run: dotnet build --no-incremental
 
       - name: 5. Rodar Testes Unitarios e Gerar Cobertura
-        # Roda os testes no projeto de testes para coletar a cobertura
+        # Roda os testes no projeto de testes e gera o relatorio de cobertura para o Sonar
         run: dotnet test test/Manutencao.SolicitacaoTestes/Manutencao.SolicitacaoTestes.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=TestResults.trx"
 
       - name: 6. Finalizar Analise e Enviar ao SonarCloud
+        # Encerra o scanner e envia todos os dados (analise de codigo e cobertura) ao SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
         run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
+
+      # -----------------------------------------------------
 
       - name: 7. Fazer Upload dos Artefatos de Build (Opcional)
         uses: actions/upload-artifact@v4
