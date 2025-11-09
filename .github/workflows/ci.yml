@@ -23,11 +23,16 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "6.0.x"
+
+      # -----------------------------------------------------
+      # 3. INICIAR ANALISE DO SONARCLOUD
+      # -----------------------------------------------------
+
       - name: 3. Iniciar Analise do SonarCloud
-        # Variáveis de ambiente para  uso do SonarScanner
         env:
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
-          # Higieniza as variáveis do PR, conforme a regra de segurança do Sonar
+          # 1. Segredo passado via variável de ambiente (Regra Sonar)
+          SONAR_TOKEN_ENV: ${{ secrets.SONARCLOUD_TOKEN }}
+          # 2. Variáveis de PR higienizadas (Regra Sonar anterior)
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_BRANCH: ${{ github.head_ref }}
           PR_BASE: ${{ github.base_ref }}
@@ -35,21 +40,25 @@ jobs:
         run: |
           dotnet tool install --global dotnet-sonarscanner
 
-          # Define os parametros padrão e básicos
-          SONAR_BEGIN_CMD="dotnet sonarscanner begin \
-            /k:\'DDD-DominioManutencaoSubsidiaria-Udemy'\
-            /o:\"tinalmeid\" \
-            /d:sonar.token=\"${{ env.SONAR_TOKEN }}\" \
-            /d:sonar.host.url=\"https://sonarcloud.io\" \
-            /d:sonar.cs.opencover.reportsPaths=\"test/Manutencao.SolicitacaoTestes/coverage.opencover.xml\""
-
-          # LOGICA CONDICIONAL: Adiciona parametros de PR APENAS se o evento for um pull_request.
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            SONAR_BEGIN_CMD+="/d:sonar.pullrequest.key=${{ env.PR_NUMBER }} /d:sonar.pullrequest.branch=${{ env.PR_BRANCH }} /d:sonar.pullrequest.base=${{ env.PR_BASE }}"
+            # Usa a variável de ambiente $SONAR_TOKEN_ENV em vez do segredo direto
+            dotnet sonarscanner begin \
+              /k:'DDD-DominioManutencaoSubsidiaria-Udemy' \
+              /o:"tinalmeid" \
+              /d:sonar.token="$SONAR_TOKEN_ENV" \
+              /d:sonar.host.url="https://sonarcloud.io" \
+              /d:sonar.cs.opencover.reportsPaths="test/Manutencao.SolicitacaoTestes/coverage.opencover.xml" \
+              /d:sonar.pullrequest.key="$PR_NUMBER" \
+              /d:sonar.pullrequest.branch="$PR_BRANCH" \
+              /d:sonar.pullrequest.base="$PR_BASE"
+          else
+            dotnet sonarscanner begin \
+              /k:'DDD-DominioManutencaoSubsidiaria-Udemy' \
+              /o:"tinalmeid" \
+              /d:sonar.token="$SONAR_TOKEN_ENV" \
+              /d:sonar.host.url="https://sonarcloud.io" \
+              /d:sonar.cs.opencover.reportsPaths="test/Manutencao.SolicitacaoTestes/coverage.opencover.xml"
           fi
-
-          # Executa o comando
-          $SONAR_BEGIN_CMD
 
       - name: 4. Build do Projeto (Compilacao)
         run: dotnet build --no-incremental
@@ -58,10 +67,10 @@ jobs:
         run: dotnet test test/Manutencao.SolicitacaoTestes/Manutencao.SolicitacaoTestes.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=TestResults.trx"
 
       - name: 6. Finalizar Analise e Enviar ao SonarCloud
-        # Passa o token via env para o scanner
         env:
-          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
-        run: dotnet sonarscanner end /d:sonar.token="${{ env.SONAR_TOKEN }}"
+          SONAR_TOKEN_ENV: ${{ secrets.SONARCLOUD_TOKEN }}
+        # Usa a variável de ambiente aqui também
+        run: dotnet sonarscanner end /d:sonar.token="$SONAR_TOKEN_ENV"
 
       # -----------------------------------------------------
 
