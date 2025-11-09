@@ -1,0 +1,24 @@
+# ----------------- Visual Studio / VS Code -----------------
+.vs/
+*.suo
+*.user
+*.userosscfg
+*.sln.docstates
+
+# ----------------- Build Artifacts -----------------
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# ----------------- Packages and Dependencies -----------------
+packages/
+node_modules/ # Incluído pois o 'json-server' usa Node/NPM
+lib/
+
+# ----------------- SonarCloud/Test Artifacts -----------------
+TestResults/
+coverage.opencover.xml
+
+# ----------------- SQL Server / Docker -----------------
+docker-compose.override.yml

@@ -1,0 +1,62 @@
+name: CI - Build, Testes e Analise de Qualidade (SonarCloud)
+
+on:
+  # Dispara em pushes na main E em todos os Pull Requests
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout do Codigo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 2. Setup do .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "6.0.x"
+
+      # --------- Integracao com SonarCloud ---------
+
+      - name: 3. Iniciar Analise do SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+        run: |
+          dotnet tool install --global dotnet-sonarscanner
+
+          # --- Comando 'dotnet sonarscanner begin' ---
+          dotnet sonarscanner begin \
+            /k:"tinalmeid_DDD_DominioManutencaoSubsidiaria_Udemy"\
+            /o:"tinalmeid" \
+            /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}" \
+            /d:sonar.host.url="https://sonarcloud.io" \
+            /d:sonar.cs.opencover.reportsPaths="test/Manutencao.SolicitacaoTestes/coverage.opencover.xml" \
+            
+            # --- Parametros condicionais para Pull Request ---
+            # O SonarCloud precisa desses parametros para fazer o Code Review no PR
+            /d:sonar.pullrequest.key=${{ github.event.pull_request.number }} \
+            /d:sonar.pullrequest.branch=${{ github.head_ref }} \
+            /d:sonar.pullrequest.base=${{ github.base_ref }}
+
+      - name: 4. Build do Projeto (Compilacao)
+        run: dotnet build --no-incremental
+
+      - name: 5. Rodar Testes Unitarios e Gerar Cobertura
+        # Roda os testes no projeto de testes para coletar a cobertura
+        run: dotnet test test/Manutencao.SolicitacaoTestes/Manutencao.SolicitacaoTestes.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover --logger "trx;LogFileName=TestResults.trx"
+
+      - name: 6. Finalizar Analise e Enviar ao SonarCloud
+        run: dotnet sonarscanner end /d:sonar.token="${{ secrets.SONARCLOUD_TOKEN }}"
+
+      - name: 7. Fazer Upload dos Artefatos de Build (Opcional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-build
+          path: src/Manutencao.Solicitacao.Api/bin/Release/
