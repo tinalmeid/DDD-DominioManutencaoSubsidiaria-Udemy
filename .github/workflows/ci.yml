@@ -37,7 +37,7 @@ jobs:
 
           # Define os parametros padrão e básicos
           SONAR_BEGIN_CMD="dotnet sonarscanner begin \
-            /k:\"DDD-DominioManutencaoSubsidiaria-Udemy\" \
+            /k:\'DDD-DominioManutencaoSubsidiaria-Udemy'\
             /o:\"tinalmeid\" \
             /d:sonar.token=\"${{ env.SONAR_TOKEN }}\" \
             /d:sonar.host.url=\"https://sonarcloud.io\" \
