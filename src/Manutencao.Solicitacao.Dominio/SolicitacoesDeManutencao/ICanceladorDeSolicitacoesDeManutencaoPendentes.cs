@@ -1,9 +1,9 @@
-using System;
+using System.Collections.Generic;
 
 namespace Manutencao.Solicitacao.Dominio.SolicitacoesDeManutencao
 {
     public interface ICanceladorDeSolicitacoesDeManutencaoPendentes
     {
-        // Implementação do cancelador de solicitações de manutenção pendentes
+        void Cancelar(IEnumerable<int> solicitacoesDeManutencaoPendentes);
     }
 }

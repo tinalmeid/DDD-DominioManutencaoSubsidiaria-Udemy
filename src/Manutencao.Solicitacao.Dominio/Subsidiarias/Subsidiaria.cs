@@ -1,6 +1,3 @@
-using System;
-using Manutencao.Solicitacao.Dominio;
-
 namespace Manutencao.Solicitacao.Dominio.Subsidiarias
 {
     public class Subsidiaria : Entidade
@@ -9,7 +6,8 @@ namespace Manutencao.Solicitacao.Dominio.Subsidiarias
 
         public Subsidiaria(string nome)
         {
-            ExcecaoDeDominio.LancarQuando(string.IsNullOrEmpty(nome), "O nome da subsidiária é Obrigatório.");
+            ExcecaoDeDominioException.LancarQuando(string.IsNullOrEmpty(nome),
+             "O nome da subsidiária é Obrigatório.");
 
             Nome = nome;
         }

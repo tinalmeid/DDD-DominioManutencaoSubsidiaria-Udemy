@@ -2,14 +2,14 @@ using System;
 
 namespace Manutencao.Solicitacao.Dominio
 {
-    public class ExcecaoDeDominio : Exception
+    public class ExcecaoDeDominioException : Exception
     {
-        public ExcecaoDeDominio(string mensagem) : base(mensagem) { }
+        public ExcecaoDeDominioException(string mensagem) : base(mensagem) { }
         public static void LancarQuando(bool regraInvalida, string mensagem)
         {
             if (regraInvalida)
             {
-                throw new ExcecaoDeDominio(mensagem);
+                throw new ExcecaoDeDominioException(mensagem);
             }
         }
     }
