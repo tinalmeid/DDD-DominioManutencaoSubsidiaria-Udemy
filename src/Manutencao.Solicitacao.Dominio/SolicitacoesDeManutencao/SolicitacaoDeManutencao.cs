@@ -17,11 +17,14 @@ namespace Manutencao.Solicitacao.Dominio.SolicitacoesDeManutencao
 
         private SolicitacaoDeManutencao()
         {
-            // Apenas para satisfazer o EF Core
+            // Apenas para satisfazer o EF Core e o compilador C#
             Solicitante = new Autor(0, "Sem Solicitante");
             Aprovador = new Autor(0, "Sem Aprovador");
             // Incluir inicialização da string IdentificadorDaSubsidiaria para evitar erro de campo obrigatório
             IdentificadorDaSubsidiaria = string.Empty;
+            Justificativa = string.Empty;
+            // Incluir inicialização do Value Object Contrato para evitar erro de campo obrigatório
+            Contrato = null!;
         }
 
         public SolicitacaoDeManutencao(
@@ -39,11 +42,11 @@ namespace Manutencao.Solicitacao.Dominio.SolicitacoesDeManutencao
         {
             // Validações das regras de negócio (Domain Exceptions)
             ExcecaoDeDominioException.LancarQuando(string.IsNullOrEmpty(identificadorDaSubsidiaria),
-             "Identificador da subsidiária é obrigatório.");
+             "A subsidiária é obrigatória.");
             ExcecaoDeDominioException.LancarQuando(string.IsNullOrEmpty(justificativa),
-             "Justificativa é obrigatória.");
+             "A justificativa é obrigatória.");
             ExcecaoDeDominioException.LancarQuando(inicioDesejadoParaManutencao < DateTime.Now.Date,
-             "Data de Início para manutenção não pode ser inferior a data atual.");
+             "Data de início para manutenção não pode ser inferior a data atual.");
 
             // Atribuições dos valores aos campos da classe
             Solicitante = new Autor(identificadorDoSolicitante, nomeDoSolicitante);

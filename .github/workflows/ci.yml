@@ -44,19 +44,26 @@ jobs:
           SONAR_BASE_ARGS="/k:'DDD-DominioManutencaoSubsidiaria-Udemy' /o:'tinalmeid' /d:sonar.token='$SONAR_TOKEN_ENV' /d:sonar.host.url='https://sonarcloud.io' /d:sonar.cs.opencover.reportsPaths='test/Manutencao.Solicitacao.Testes/coverage.opencover.xml'"
 
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # Comando para Pull Request (usa parâmetros de comparação)
-            dotnet sonarscanner begin $SONAR_BASE_ARGS \
+            # Usa a variável de ambiente $SONAR_TOKEN_ENV em vez do segredo direto
+            dotnet sonarscanner begin \
+              /k:'DDD-DominioManutencaoSubsidiaria-Udemy' \
+              /o:"tinalmeid" \
+              /d:sonar.token="$SONAR_TOKEN_ENV" \
+              /d:sonar.host.url="https://sonarcloud.io" \
+              /d:sonar.cs.opencover.reportsPaths="test/Manutencao.Solicitacao.Testes/coverage.opencover.xml" \
               /d:sonar.pullrequest.key="$PR_NUMBER" \
               /d:sonar.pullrequest.branch="$PR_BRANCH" \
               /d:sonar.pullrequest.base="$PR_BASE"
           else
-            # Comando para PUSH na MAIN (Usa parâmetro de branch para registro/baseline)
-            dotnet sonarscanner begin $SONAR_BASE_ARGS \
-              /d:sonar.branch.name="main"
+            dotnet sonarscanner begin \
+              /k:'DDD-DominioManutencaoSubsidiaria-Udemy' \
+              /o:"tinalmeid" \
+              /d:sonar.token="$SONAR_TOKEN_ENV" \
+              /d:sonar.host.url="https://sonarcloud.io" \
+              /d:sonar.cs.opencover.reportsPaths="test/Manutencao.Solicitacao.Testes/coverage.opencover.xml"
           fi
 
       - name: 4. Build do Projeto (Compilacao)
-        # CORREÇÃO: Especifica o arquivo de solução explicitamente para evitar erro MSB1003
         run: dotnet build Manutencao.Solicitacao.sln --no-incremental
 
       - name: 5. Rodar Testes Unitarios e Gerar Cobertura

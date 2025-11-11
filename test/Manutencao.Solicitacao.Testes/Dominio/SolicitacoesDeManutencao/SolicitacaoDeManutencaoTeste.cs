@@ -115,7 +115,7 @@ namespace Manutencao.Solicitacao.Testes.Dominio.SolicitacoesDeManutencao
         [Fact]
         public void Deve_validar_data_de_inicio_desejado_para_manutencao()
         {
-            const string mensagemEsperada = "A data de início desejado para manutenção deve ser futura.";
+            const string mensagemEsperada = "Data de início para manutenção não pode ser inferior a data atual.";
             var dataInvalida = DateTime.Now.AddDays(-1);
             _inicioDesejadoParaManutencao = dataInvalida;
 

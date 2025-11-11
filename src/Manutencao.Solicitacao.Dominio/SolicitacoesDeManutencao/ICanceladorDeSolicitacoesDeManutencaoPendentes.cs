@@ -4,6 +4,6 @@ namespace Manutencao.Solicitacao.Dominio.SolicitacoesDeManutencao
 {
     public interface ICanceladorDeSolicitacoesDeManutencaoPendentes
     {
-        void Cancelar(IEnumerable<int> solicitacoesDeManutencaoPendentes);
+        void Cancelar(IEnumerable<SolicitacaoDeManutencao> solicitacoesDeManutencaoPendentes);
     }
 }

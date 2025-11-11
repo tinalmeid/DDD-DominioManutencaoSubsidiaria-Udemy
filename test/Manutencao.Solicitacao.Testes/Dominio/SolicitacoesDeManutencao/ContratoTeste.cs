@@ -10,7 +10,7 @@ namespace Manutencao.Solicitacao.Testes.Dominio.SolicitacoesDeManutencao
     {
         private const string Numero = "12345";
         private const string NomeDaTerceirizada = "Gramas Ltda";
-        private const string CnpjDaTerceirizada = "12.345.678/0001-90";
+        private const string CnpjDaTerceirizada = "12345678000190";
         private const string GestorDoContrato = "Marina Silva";
         private readonly DateTime DataFinalDaVigencia = DateTime.Now.AddMonths(1);
 
@@ -89,7 +89,7 @@ namespace Manutencao.Solicitacao.Testes.Dominio.SolicitacoesDeManutencao
         [InlineData(null)]
         public void Deve_validar_gestor_do_contrato(string gestorDoContratoInvalido)
         {
-            const string mensagemEsperada = "O gestor do contrato é obrigatório.";
+            const string mensagemEsperada = "O nome do gestor do contrato é obrigatório.";
 
             AssertExtensions.ThrowsWithMessage(() => new Contrato(
                 Numero,
@@ -103,7 +103,7 @@ namespace Manutencao.Solicitacao.Testes.Dominio.SolicitacoesDeManutencao
         [Fact]
         public void Deve_validar_data_final_da_vigencia()
         {
-            const string mensagemEsperada = "A data final da vigência do contrato deve ser maior que a data atual.";
+            const string mensagemEsperada = "A data final da vigência deve ser MAIOR que a data atual.";
 
             AssertExtensions.ThrowsWithMessage(() => new Contrato(
                 Numero,

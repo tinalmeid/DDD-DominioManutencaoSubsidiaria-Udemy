@@ -21,7 +21,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="FluentAssertions" Version="6.11.0" />
-    <PackageReference Include="Nosbor.FluentBuilder" Version="1.1.0" />
+    <PackageReference Include="Nosbor.FluentBuilder" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
