@@ -1,14 +1,15 @@
 using System;
-using Manutencao.Solicitacao.Aplicacao.Subsidiarias;
+using Manutencao.Solicitacao.Aplicacao.SolicitacoesDeManutencao;
 using Manutencao.Solicitacao.Dominio;
 using Manutencao.Solicitacao.Dominio.SolicitacoesDeManutencao;
+using Manutencao.Solicitacao.Aplicacao.Subsidiarias;
 
 namespace Manutencao.Solicitacao.Aplicacao.SolicitacoesDeManutencao
 {
     public class FabricaDeSolicitacaoDeManutencao
     {
         private readonly ISubsidiariaRepositorio _subsidiariaRepositorio;
-        private readonly IBusccadorDeContrato _buscadorDeContrato;
+        private readonly IBuscadorDeContrato _buscadorDeContrato;
 
         protected FabricaDeSolicitacaoDeManutencao()
         {
@@ -17,13 +18,13 @@ namespace Manutencao.Solicitacao.Aplicacao.SolicitacoesDeManutencao
 
         public FabricaDeSolicitacaoDeManutencao(
             ISubsidiariaRepositorio subsidiariaRepositorio,
-            IBusccadorDeContrato buscadorDeContrato)
+            IBuscadorDeContrato buscadorDeContrato)
         {
             _subsidiariaRepositorio = subsidiariaRepositorio;
             _buscadorDeContrato = buscadorDeContrato;
         }
 
-        public virtual SolicitacaoDeManutencao Fabricar(SolicitacaoDeManutencao dto)
+        public virtual SolicitacaoDeManutencao Fabricar(SolicitacaoDeManutencaoDto dto)
         {
             var subsidiaria = _subsidiariaRepositorio.ObterPorId(dto.SubsidiariaId);
             ExcecaoDeDominioException.LancarQuando(subsidiaria == null,
@@ -44,10 +45,10 @@ namespace Manutencao.Solicitacao.Aplicacao.SolicitacoesDeManutencao
                 (TipoDeSolicitacaoDeManutencao)tipoDeSolicitacaoDeManutencao,
                 dto.Justificativa,
                 contratoDto.NumeroDoContrato,
-                contratoDto.NomeDaTerceirizada,
-                contratoDto.CnpjDaTerceirizada,
+                contratoDto.NomeDaTerceirizadaDoContrato,
+                contratoDto.CnpjDaTerceirizadaDoContrato,
                 contratoDto.GestorDoContrato,
-                contratoDto.DataFinalDaVigencia,
+                contratoDto.DataFinalDaVigenciaDoContrato,
                 dto.InicioDesejadoParaManutencao);
         }
     }   

@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Manutencao.Solicitacao.Dominio.SolicitacoesDeManutencao;
+using Manutencao.Solicitacao.Dominio;
 
 namespace Manutencao.Solicitacao.Aplicacao.SolicitacoesDeManutencao
 {
